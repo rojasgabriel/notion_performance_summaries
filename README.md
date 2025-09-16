@@ -8,4 +8,4 @@ features still pending:
 
 Usage: `python notion_summaries.py 20250820 9`
 
-This will generate performance summaries, abck them up to Google Drive, and insert them into Notion.
+This will generate performance summaries, back them up to Google Drive using rclone, and insert them into Notion.
