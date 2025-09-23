@@ -7,7 +7,7 @@
     "",
     "REQUIRED CONFIGURATION:",
     "",
-    "• paths.input_loc: Directory where your lab data files are stored",
+    "• paths.input_loc: Directory where your data are stored",
     "  Example: '/Users/yourname/lab_data' or '/home/user/data'",
     "  Used by the labdata tool to find session files",
     "",
