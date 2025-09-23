@@ -1,0 +1,44 @@
+{
+  "_README": [
+    "=== PREFERENCES CONFIGURATION GUIDE ===",
+    "",
+    "Copy this file to 'preferences.json' and customize the values for your setup.",
+    "Remove this '_README' section after copying.",
+    "",
+    "REQUIRED CONFIGURATION:",
+    "",
+    "• paths.input_loc: Directory where your data are stored",
+    "  Example: '/Users/yourname/data'",
+    "  Used by the matlab batch script",
+    "",
+    "• paths.output_loc: Directory where performance summary PNG files will be saved", 
+    "  Example: '/Users/yourname/performance_summaries'",
+    "  The application creates subdirectories here for each subject",
+    "",
+    "• paths.remote: rclone remote path for Google Drive backup",
+    "  Format: 'remote_name:folder_path'",
+    "  Example: 'my_gdrive:performance_summaries'",
+    "  Must match your rclone configuration",
+    "",
+    "• subjects: List of lab subject IDs to process",
+    "  Example: ['GRB036', 'GRB037', 'GRB038']",
+    "  Replace with your actual subject identifiers",
+    "",
+    "ADVANCED (usually don't need to change):",
+    "• notion.version: Current Notion API version",
+    "• notion.version_legacy: Legacy API version for database operations"
+  ],
+  "paths": {
+    "input_loc": "/path/to/your/lab/data",
+    "output_loc": "/path/to/your/performance/summaries",
+    "remote": "your_gdrive_remote:folder_name"
+  },
+  "subjects": [
+    "YOUR_SUBJECT_001",
+    "YOUR_SUBJECT_002"
+  ],
+  "notion": {
+    "version": "2025-09-03",
+    "version_legacy": "2022-06-28"
+  }
+}

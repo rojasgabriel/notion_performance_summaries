@@ -2,6 +2,10 @@
 
 import os
 from typing import Dict
+from preferences import get_preference, validate_preferences
+
+# Validate preferences before loading configuration
+validate_preferences()
 
 # === CONFIG ===
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
@@ -15,12 +19,13 @@ if not LAB_DB_ID:
         "LAB_DB_ID environment variable is not set. Export your Notion lab database ID as LAB_ANIMALS_DB_ID."
     )
 
-OUTPUT_LOC = "/Users/gabriel/performance_summaries"
-REMOTE = "my_gdrive:performance_summaries"
-SUBJECTS = ["GRB036", "GRB037", "GRB038", "GRB039", "GRB045", "GRB046", "GRB047"]
+# Load configuration from preferences.json (validation ensures these are not empty)
+OUTPUT_LOC = get_preference("paths.output_loc")
+REMOTE = get_preference("paths.remote")
+SUBJECTS = get_preference("subjects")
 
 # Notion API headers
-NOTION_VERSION = "2025-09-03"
+NOTION_VERSION = get_preference("notion.version", "2025-09-03")
 base_headers = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
     "Notion-Version": NOTION_VERSION,
@@ -31,7 +36,7 @@ json_headers = {
 }
 
 # Legacy headers for database operations (pre-2025 data sources)
-NOTION_VERSION_LEGACY = "2022-06-28"
+NOTION_VERSION_LEGACY = get_preference("notion.version_legacy", "2022-06-28")
 legacy_base_headers = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
     "Notion-Version": NOTION_VERSION_LEGACY,
