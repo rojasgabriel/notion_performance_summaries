@@ -32,5 +32,4 @@ setup(
             "notion_summaries=notion_summaries:cli",
         ],
     },
-    keywords="notion lab data analysis performance summaries",
 )
