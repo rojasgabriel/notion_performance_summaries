@@ -51,12 +51,47 @@ def find_child_db(page_id):
     return None
 
 
+def find_existing_summary(perf_db_id, session_name):
+    """Check if a performance summary entry already exists for the given session."""
+    url = f"https://api.notion.com/v1/databases/{perf_db_id}/query"
+    payload = {"filter": {"property": "Session ID", "title": {"equals": session_name}}}
+    res = requests.post(url, headers=legacy_json_headers, json=payload)
+    res.raise_for_status()
+    data = res.json()
+    return data["results"][0]["id"] if data["results"] else None
+
+
 def insert_summary(
-    perf_db_id, subject, notion_file_id=None, external_url=None, session_name=None
+    perf_db_id,
+    subject,
+    notion_file_id=None,
+    external_url=None,
+    session_name=None,
+    overwrite=False,
 ):
     """Insert a performance summary entry into the Notion database."""
     if session_name is None:
         session_name = subject
+
+    # Check if entry already exists
+    existing_page_id = find_existing_summary(perf_db_id, session_name)
+    if existing_page_id:
+        if not overwrite:
+            print(
+                f"⚠️ Entry for {session_name} already exists. Use --overwrite to replace it."
+            )
+            return existing_page_id
+        else:
+            print(f"🔄 Overwriting existing entry for {session_name}")
+            # Delete the existing entry
+            delete_url = f"https://api.notion.com/v1/pages/{existing_page_id}"
+            delete_payload = {"archived": True}
+            res = requests.patch(delete_url, headers=json_headers, json=delete_payload)
+            try:
+                res.raise_for_status()
+                print(f"🗑️ Archived existing entry for {session_name}")
+            except requests.exceptions.HTTPError as e:
+                print(f"⚠️ Warning: Could not archive existing entry: {e}")
 
     create_url = "https://api.notion.com/v1/pages"
     perf_ds_id = get_data_source_id(perf_db_id)
