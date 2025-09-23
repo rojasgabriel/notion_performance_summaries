@@ -26,7 +26,7 @@ The preferences file is searched for in this order:
 
 You must configure these required fields in your `preferences.json`:
 
-- **`paths.input_loc`**: Directory where your lab data files are stored
+- **`paths.input_loc`**: Directory where your data are stored
 - **`paths.output_loc`**: Directory where performance summary PNG files will be saved
 - **`paths.remote`**: rclone remote path for Google Drive backup (format: `remote_name:folder_path`)
 - **`subjects`**: List of lab subject IDs to process (e.g., `["GRB036", "GRB037"]`)
