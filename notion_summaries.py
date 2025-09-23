@@ -1,6 +1,6 @@
 import os
 import re
-import sys
+import argparse
 
 # Import from organized modules
 from config import OUTPUT_LOC, SUBJECTS
@@ -10,7 +10,7 @@ from file_operations import upload_to_drive
 
 
 # === MAIN PIPELINE ===
-def main(pattern, sessions_back, notion_only=False):
+def main(pattern, sessions_back, notion_only=False, overwrite=False):
     input_loc = "/Users/gabriel/data"
     labdata_loc = input_loc
 
@@ -54,20 +54,54 @@ def main(pattern, sessions_back, notion_only=False):
                     subject,
                     notion_file_id=notion_file_id,
                     session_name=session_name,
+                    overwrite=overwrite,
                 )
 
 
+def parse_arguments():
+    """Parse command line arguments using argparse."""
+    parser = argparse.ArgumentParser(
+        description="Generate performance summaries for chipmunk lab data and upload them to Notion.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python notion_summaries.py 20250820 9
+  python notion_summaries.py 20250820 9 --notion-only
+  python notion_summaries.py 20250820 9 --overwrite
+  python notion_summaries.py 20250820 9 --notion-only --overwrite
+        """,
+    )
+
+    parser.add_argument(
+        "pattern", help="Date pattern in YYYYMMDD format (e.g., 20250820)"
+    )
+
+    parser.add_argument(
+        "sessions_back",
+        type=int,
+        help="Number of sessions to go back from the pattern date",
+    )
+
+    parser.add_argument(
+        "--notion-only",
+        action="store_true",
+        help="Skip data processing and MATLAB execution, only upload existing PNG files to Notion",
+    )
+
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing entries in the database instead of skipping them",
+    )
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    notion_only_flag = False
-    args = sys.argv[1:]
-    if "--notion-only" in args:
-        notion_only_flag = True
-        args.remove("--notion-only")
-
-    if len(args) != 2:
-        print(
-            "Usage: python notion_summaries.py <YYYYMMDD> <sessionsBack> [--notion-only]"
-        )
-        sys.exit(1)
-
-    main(args[0], int(args[1]), notion_only=notion_only_flag)
+    args = parse_arguments()
+    main(
+        args.pattern,
+        args.sessions_back,
+        notion_only=args.notion_only,
+        overwrite=args.overwrite,
+    )
