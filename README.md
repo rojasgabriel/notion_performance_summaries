@@ -10,6 +10,42 @@ Install the package using pip:
 pip install -e .
 ```
 
+## Configuration
+
+When you first run the application, it will automatically create a `preferences.json` file with default settings. This file replaces the previously hardcoded values and allows you to customize the application for your specific setup.
+
+### Preferences File Location
+
+The preferences file is searched for in this order:
+1. Current working directory: `./preferences.json`
+2. User home directory: `~/.notion_performance_summaries/preferences.json`
+
+### Preferences Structure
+
+```json
+{
+  "paths": {
+    "input_loc": "/Users/gabriel/data",
+    "output_loc": "/Users/gabriel/performance_summaries",
+    "remote": "my_gdrive:performance_summaries"
+  },
+  "subjects": [
+    "GRB036", "GRB037", "GRB038", "GRB039", 
+    "GRB045", "GRB046", "GRB047"
+  ],
+  "notion": {
+    "version": "2025-09-03",
+    "version_legacy": "2022-06-28"
+  }
+}
+```
+
+You can edit this file to:
+- Change input and output directory paths
+- Modify the Google Drive remote path
+- Update the list of lab subjects to process
+- Adjust Notion API versions if needed
+
 ## Usage
 
 After installation, you can use the `notion_summaries` command directly:

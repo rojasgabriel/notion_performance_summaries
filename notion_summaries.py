@@ -7,11 +7,12 @@ from config import OUTPUT_LOC, SUBJECTS
 from data_processing import ensure_sessions, run_matlab
 from notion_api import find_subject_page, find_child_db, insert_summary
 from file_operations import upload_to_drive
+from preferences import get_preference
 
 
 # === MAIN PIPELINE ===
 def main(pattern, sessions_back, notion_only=False, overwrite=False):
-    input_loc = "/Users/gabriel/data"
+    input_loc = get_preference("paths.input_loc", "/Users/gabriel/data")
     labdata_loc = input_loc
 
     for subject in SUBJECTS:
