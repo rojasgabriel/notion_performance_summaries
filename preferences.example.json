@@ -9,7 +9,7 @@
     "",
     "• paths.input_loc: Directory where your data are stored",
     "  Example: '/Users/yourname/data'",
-    "  Used by the labdata tool to find session files",
+    "  Used by the matlab batch script",
     "",
     "• paths.output_loc: Directory where performance summary PNG files will be saved", 
     "  Example: '/Users/yourname/performance_summaries'",
