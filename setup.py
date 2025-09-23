@@ -2,7 +2,6 @@
 """Setup script for notion-performance-summaries package."""
 
 from setuptools import setup, find_packages
-import os
 
 
 def read_readme():
@@ -16,8 +15,8 @@ def read_readme():
 
 setup(
     name="notion-performance-summaries",
-    version="1.0.0",
-    description="Generate performance summaries for chipmunk lab data and upload them to Notion",
+    version="0.1.0",
+    description="Generate performance summaries for chipmunk using matlab and labdata-tools and upload them to Notion",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     author="Gabriel Rojas",

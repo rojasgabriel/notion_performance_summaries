@@ -64,16 +64,16 @@ def parse_arguments():
         description="Generate performance summaries for chipmunk lab data and upload them to Notion.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  notion_summaries 20250820 9
-  notion_summaries 20250820 9 --notion-only
-  notion_summaries 20250820 9 --overwrite
-  notion_summaries 20250820 9 --notion-only --overwrite
-        """,
+            Examples:
+            notion_summaries 20250820 9
+            notion_summaries 20250820 9 --notion-only
+            notion_summaries 20250820 9 --overwrite
+            notion_summaries 20250820 9 --notion-only --overwrite
+                    """,
     )
 
     parser.add_argument(
-        "pattern", help="Date pattern in YYYYMMDD format (e.g., 20250820)"
+        "date_pattern", help="Date pattern in YYYYMMDD format (e.g., 20250820)"
     )
 
     parser.add_argument(
@@ -101,7 +101,7 @@ def cli():
     """Entry point for the console script."""
     args = parse_arguments()
     main(
-        args.pattern,
+        args.date_pattern,
         args.sessions_back,
         notion_only=args.notion_only,
         overwrite=args.overwrite,
