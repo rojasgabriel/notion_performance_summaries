@@ -1,25 +1,44 @@
 {
-  "_comment": "This is an example preferences.json file. Copy this file to 'preferences.json' and customize the values below for your setup.",
+  "_README": [
+    "=== PREFERENCES CONFIGURATION GUIDE ===",
+    "",
+    "Copy this file to 'preferences.json' and customize the values for your setup.",
+    "Remove this '_README' section after copying.",
+    "",
+    "REQUIRED CONFIGURATION:",
+    "",
+    "• paths.input_loc: Directory where your lab data files are stored",
+    "  Example: '/Users/yourname/lab_data' or '/home/user/data'",
+    "  Used by the labdata tool to find session files",
+    "",
+    "• paths.output_loc: Directory where performance summary PNG files will be saved", 
+    "  Example: '/Users/yourname/performance_summaries'",
+    "  The application creates subdirectories here for each subject",
+    "",
+    "• paths.remote: rclone remote path for Google Drive backup",
+    "  Format: 'remote_name:folder_path'",
+    "  Example: 'my_gdrive:performance_summaries'",
+    "  Must match your rclone configuration",
+    "",
+    "• subjects: List of lab subject IDs to process",
+    "  Example: ['GRB036', 'GRB037', 'GRB038']",
+    "  Replace with your actual subject identifiers",
+    "",
+    "ADVANCED (usually don't need to change):",
+    "• notion.version: Current Notion API version",
+    "• notion.version_legacy: Legacy API version for database operations"
+  ],
   "paths": {
-    "_description": "File system paths used by the application",
     "input_loc": "/path/to/your/lab/data",
-    "_input_loc_help": "Directory where lab data files are stored (used by labdata tool)",
     "output_loc": "/path/to/your/performance/summaries",
-    "_output_loc_help": "Directory where generated PNG performance summary files will be saved",
-    "remote": "your_gdrive_remote:folder_name",
-    "_remote_help": "rclone remote path for backing up files to Google Drive (format: remote_name:folder_path)"
+    "remote": "your_gdrive_remote:folder_name"
   },
   "subjects": [
-    "_description: List of lab subject IDs to process. Example: ['GRB036', 'GRB037', 'GRB038']",
-    "SUBJECT001",
-    "SUBJECT002"
+    "YOUR_SUBJECT_001",
+    "YOUR_SUBJECT_002"
   ],
-  "_subjects_help": "Replace the example subjects above with your actual lab subject IDs",
   "notion": {
-    "_description": "Notion API version settings - usually don't need to change these",
     "version": "2025-09-03",
-    "_version_help": "Current Notion API version for new features",
-    "version_legacy": "2022-06-28",
-    "_version_legacy_help": "Legacy Notion API version for database operations"
+    "version_legacy": "2022-06-28"
   }
 }
