@@ -65,10 +65,10 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python notion_summaries.py 20250820 9
-  python notion_summaries.py 20250820 9 --notion-only
-  python notion_summaries.py 20250820 9 --overwrite
-  python notion_summaries.py 20250820 9 --notion-only --overwrite
+  notion_summaries 20250820 9
+  notion_summaries 20250820 9 --notion-only
+  notion_summaries 20250820 9 --overwrite
+  notion_summaries 20250820 9 --notion-only --overwrite
         """,
     )
 
@@ -97,7 +97,8 @@ Examples:
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def cli():
+    """Entry point for the console script."""
     args = parse_arguments()
     main(
         args.pattern,
@@ -105,3 +106,7 @@ if __name__ == "__main__":
         notion_only=args.notion_only,
         overwrite=args.overwrite,
     )
+
+
+if __name__ == "__main__":
+    cli()
