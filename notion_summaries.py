@@ -70,7 +70,7 @@ def ensure_sessions(subject, pattern, sessions_back, input_loc):
     # Get list of sessions
     out = run_cmd(["labdata", "sessions", subject, "--files"])
     sessions = sorted(
-        re.findall(r"[0-9]{8}_[0-9]{6}", out), reverse=True
+        list(set(re.findall(r"[0-9]{8}_[0-9]{6}", out))), reverse=True
     )
     # Find pattern match
     match_index = next((i for i, s in enumerate(sessions) if s.startswith(pattern)), -1)
