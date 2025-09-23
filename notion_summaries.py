@@ -3,7 +3,7 @@ import re
 import subprocess
 import requests
 import json
-from datetime import datetime
+from typing import Dict
 
 # === CONFIG ===
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
@@ -42,7 +42,9 @@ legacy_json_headers = {
 }
 
 # Simple cache for database_id -> data_source_id lookups
+_DATA_SOURCE_CACHE: Dict[str, str] = {}
 _DATA_SOURCE_CACHE = {}
+
 
 def get_data_source_id(database_id: str) -> str:
     if database_id in _DATA_SOURCE_CACHE:
@@ -62,16 +64,16 @@ def get_data_source_id(database_id: str) -> str:
 # === HELPERS ===
 def run_cmd(cmd):
     print("▶", " ".join(cmd))
-    return subprocess.run(cmd, capture_output=True, text=True, check=True).stdout.strip()
+    return subprocess.run(
+        cmd, capture_output=True, text=True, check=True
+    ).stdout.strip()
 
 
 def ensure_sessions(subject, pattern, sessions_back, input_loc):
     """Mimics labdata session checking/downloading logic."""
     # Get list of sessions
     out = run_cmd(["labdata", "sessions", subject, "--files"])
-    sessions = sorted(
-        list(set(re.findall(r"[0-9]{8}_[0-9]{6}", out))), reverse=True
-    )
+    sessions = sorted(list(set(re.findall(r"[0-9]{8}_[0-9]{6}", out))), reverse=True)
     # Find pattern match
     match_index = next((i for i, s in enumerate(sessions) if s.startswith(pattern)), -1)
     if match_index < 0:
@@ -82,11 +84,15 @@ def ensure_sessions(subject, pattern, sessions_back, input_loc):
 
     for sess in to_download:
         session_dir = f"{input_loc}/{subject}/{sess}/chipmunk"
-        if os.path.exists(session_dir) and any(f.endswith(".mat") for f in os.listdir(session_dir)):
+        if os.path.exists(session_dir) and any(
+            f.endswith(".mat") for f in os.listdir(session_dir)
+        ):
             print(f"✅ Already downloaded: {subject} {sess}")
         else:
             print(f"⬇️ Downloading: {subject} {sess}")
-            run_cmd(["labdata", "get", subject, "-s", sess, "-d", "chipmunk", "-i", "*.mat"])
+            run_cmd(
+                ["labdata", "get", subject, "-s", sess, "-d", "chipmunk", "-i", "*.mat"]
+            )
     return to_download
 
 
@@ -113,7 +119,9 @@ def upload_to_notion_and_get_file_id(filepath):
         file_name = os.path.basename(filepath)
         mime_type = "image/png"  # our summaries are PNGs
         file_size = os.path.getsize(filepath)
-        print(f"📤 Starting direct Notion upload for {file_name} ({file_size} bytes)...")
+        print(
+            f"📤 Starting direct Notion upload for {file_name} ({file_size} bytes)..."
+        )
 
         # Step 1: Create a file upload (JSON)
         create_payload = {
@@ -121,7 +129,11 @@ def upload_to_notion_and_get_file_id(filepath):
             "content_type": mime_type,
             "mode": "single_part",
         }
-        r_create = requests.post("https://api.notion.com/v1/file_uploads", headers=json_headers, json=create_payload)
+        r_create = requests.post(
+            "https://api.notion.com/v1/file_uploads",
+            headers=json_headers,
+            json=create_payload,
+        )
         try:
             r_create.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -130,11 +142,17 @@ def upload_to_notion_and_get_file_id(filepath):
                 body = r_create.text
             except Exception:
                 pass
-            print(f"❌ HTTP Error during Notion create file upload: {e}\nResponse Body: {body}")
+            print(
+                f"❌ HTTP Error during Notion create file upload: {e}\nResponse Body: {body}"
+            )
             raise
 
         meta = r_create.json()
-        file_id = meta.get("id") or (meta.get("file_upload", {}) if isinstance(meta.get("file_upload"), dict) else {}).get("id")
+        file_id = meta.get("id") or (
+            meta.get("file_upload", {})
+            if isinstance(meta.get("file_upload"), dict)
+            else {}
+        ).get("id")
         if not file_id:
             print("⚠️ Unexpected create response:", json.dumps(meta, indent=2))
             raise RuntimeError("Notion did not return file upload id")
@@ -152,7 +170,9 @@ def upload_to_notion_and_get_file_id(filepath):
                 body = r_send.text
             except Exception:
                 pass
-            print(f"❌ HTTP Error during Notion send file upload: {e}\nResponse Body: {body}")
+            print(
+                f"❌ HTTP Error during Notion send file upload: {e}\nResponse Body: {body}"
+            )
             raise
 
         print(f"✅ Uploaded to Notion (file id: {file_id})")
@@ -166,12 +186,12 @@ def upload_to_notion_and_get_file_id(filepath):
 def upload_to_drive(subject, fname):
     """Upload PNG to Drive as backup, then upload to Notion and return Notion file id."""
     local_file_path = f"{OUTPUT_LOC}/{subject}/{fname}"
-    
+
     # Backup to Google Drive
     remote_path = f"{REMOTE}/{subject}"
     run_cmd(["rclone", "copy", local_file_path, remote_path])
     print(f"📁 Backed up to Google Drive: {remote_path}")
-    
+
     # Upload to Notion and get the Notion file id
     return upload_to_notion_and_get_file_id(local_file_path)
 
@@ -198,7 +218,9 @@ def find_child_db(page_id):
     return None
 
 
-def insert_summary(perf_db_id, subject, notion_file_id=None, external_url=None, session_name=None):
+def insert_summary(
+    perf_db_id, subject, notion_file_id=None, external_url=None, session_name=None
+):
     if session_name is None:
         session_name = subject
 
@@ -250,7 +272,9 @@ def main(pattern, sessions_back, notion_only=False):
             if not sessions:
                 continue
             subject_output = f"{OUTPUT_LOC}/{subject}"
-            run_matlab(subject, input_loc, labdata_loc, subject_output, sessions_back, pattern)
+            run_matlab(
+                subject, input_loc, labdata_loc, subject_output, sessions_back, pattern
+            )
         else:
             subject_output = f"{OUTPUT_LOC}/{subject}"
             if not os.path.exists(subject_output):
@@ -269,16 +293,24 @@ def main(pattern, sessions_back, notion_only=False):
                 if not perf_db_id:
                     print(f"⚠️ No child DB for {subject}")
                     continue
-                
+
                 # Extract a cleaner session name from the filename
                 match = re.search(r"(\d{8})", fname)
-                session_name = match.group(1) if match else fname.replace("_summary.png", "")
+                session_name = (
+                    match.group(1) if match else fname.replace("_summary.png", "")
+                )
 
-                insert_summary(perf_db_id, subject, notion_file_id=notion_file_id, session_name=session_name)
+                insert_summary(
+                    perf_db_id,
+                    subject,
+                    notion_file_id=notion_file_id,
+                    session_name=session_name,
+                )
 
 
 if __name__ == "__main__":
     import sys
+
     notion_only_flag = False
     args = sys.argv[1:]
     if "--notion-only" in args:
@@ -286,7 +318,9 @@ if __name__ == "__main__":
         args.remove("--notion-only")
 
     if len(args) != 2:
-        print("Usage: python notion_summaries.py <YYYYMMDD> <sessionsBack> [--notion-only]")
+        print(
+            "Usage: python notion_summaries.py <YYYYMMDD> <sessionsBack> [--notion-only]"
+        )
         sys.exit(1)
 
     main(args[0], int(args[1]), notion_only=notion_only_flag)
