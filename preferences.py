@@ -7,11 +7,11 @@ from typing import Dict, Any
 
 DEFAULT_PREFERENCES = {
     "paths": {
-        "input_loc": "/Users/gabriel/data",
-        "output_loc": "/Users/gabriel/performance_summaries",
-        "remote": "my_gdrive:performance_summaries",
+        "input_loc": "",
+        "output_loc": "",
+        "remote": "",
     },
-    "subjects": ["GRB036", "GRB037", "GRB038", "GRB039", "GRB045", "GRB046", "GRB047"],
+    "subjects": [],
     "notion": {"version": "2025-09-03", "version_legacy": "2022-06-28"},
 }
 
@@ -36,7 +36,11 @@ def create_default_preferences(preferences_path: Path) -> Dict[str, Any]:
         json.dump(DEFAULT_PREFERENCES, f, indent=2)
 
     print(f"✨ Created default preferences file at: {preferences_path}")
-    print("🔧 You can edit this file to customize paths and subjects for your setup.")
+    print("⚠️  IMPORTANT: You must edit this file before running the application!")
+    print(
+        "🔧 Please configure your input/output paths and lab subjects in the preferences file."
+    )
+    print("📝 See preferences.example.json for detailed configuration help.")
 
     return DEFAULT_PREFERENCES
 
@@ -97,6 +101,34 @@ def get_preference(key_path: str, default=None):
             return default
 
     return value
+
+
+def validate_preferences():
+    """Validate that required preferences are configured."""
+    errors = []
+
+    # Check required paths
+    required_paths = ["paths.input_loc", "paths.output_loc", "paths.remote"]
+    for path_key in required_paths:
+        value = get_preference(path_key, "")
+        if not value or value.strip() == "":
+            errors.append(f"Missing required configuration: {path_key}")
+
+    # Check subjects
+    subjects = get_preference("subjects", [])
+    if not subjects or len(subjects) == 0:
+        errors.append("Missing required configuration: subjects list cannot be empty")
+
+    if errors:
+        preferences_path = get_preferences_path()
+        print("❌ Configuration Error: Required preferences are missing or empty!")
+        for error in errors:
+            print(f"   • {error}")
+        print(f"\n🔧 Please edit your preferences file: {preferences_path}")
+        print("📝 See preferences.example.json for configuration help.")
+        raise RuntimeError(
+            "Application cannot run with incomplete configuration. Please update your preferences.json file."
+        )
 
 
 def reload_preferences():

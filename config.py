@@ -2,7 +2,10 @@
 
 import os
 from typing import Dict
-from preferences import get_preference
+from preferences import get_preference, validate_preferences
+
+# Validate preferences before loading configuration
+validate_preferences()
 
 # === CONFIG ===
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
@@ -16,12 +19,10 @@ if not LAB_DB_ID:
         "LAB_DB_ID environment variable is not set. Export your Notion lab database ID as LAB_ANIMALS_DB_ID."
     )
 
-# Load configuration from preferences.json
-OUTPUT_LOC = get_preference("paths.output_loc", "/Users/gabriel/performance_summaries")
-REMOTE = get_preference("paths.remote", "my_gdrive:performance_summaries")
-SUBJECTS = get_preference(
-    "subjects", ["GRB036", "GRB037", "GRB038", "GRB039", "GRB045", "GRB046", "GRB047"]
-)
+# Load configuration from preferences.json (validation ensures these are not empty)
+OUTPUT_LOC = get_preference("paths.output_loc")
+REMOTE = get_preference("paths.remote")
+SUBJECTS = get_preference("subjects")
 
 # Notion API headers
 NOTION_VERSION = get_preference("notion.version", "2025-09-03")

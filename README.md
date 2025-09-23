@@ -12,7 +12,9 @@ pip install -e .
 
 ## Configuration
 
-When you first run the application, it will automatically create a `preferences.json` file with default settings. This file replaces the previously hardcoded values and allows you to customize the application for your specific setup.
+⚠️ **IMPORTANT**: You must configure the application before first use!
+
+When you first run the application, it will automatically create a `preferences.json` file with empty settings that you must fill out. The application will not run until you configure your specific paths and lab subjects.
 
 ### Preferences File Location
 
@@ -20,20 +22,28 @@ The preferences file is searched for in this order:
 1. Current working directory: `./preferences.json`
 2. User home directory: `~/.notion_performance_summaries/preferences.json`
 
+### Required Configuration
+
+You must configure these required fields in your `preferences.json`:
+
+- **`paths.input_loc`**: Directory where your lab data files are stored
+- **`paths.output_loc`**: Directory where performance summary PNG files will be saved
+- **`paths.remote`**: rclone remote path for Google Drive backup (format: `remote_name:folder_path`)
+- **`subjects`**: List of lab subject IDs to process (e.g., `["GRB036", "GRB037"]`)
+
 ### Preferences Structure
 
-A complete example can be found in `preferences.example.json`:
+A complete example with descriptions can be found in `preferences.example.json`. Your `preferences.json` should look like:
 
 ```json
 {
   "paths": {
-    "input_loc": "/Users/gabriel/data",
-    "output_loc": "/Users/gabriel/performance_summaries", 
-    "remote": "my_gdrive:performance_summaries"
+    "input_loc": "/path/to/your/lab/data",
+    "output_loc": "/path/to/your/performance/summaries",
+    "remote": "your_gdrive_remote:folder_name"
   },
   "subjects": [
-    "GRB036", "GRB037", "GRB038", "GRB039", 
-    "GRB045", "GRB046", "GRB047"
+    "YOUR_SUBJECT_001", "YOUR_SUBJECT_002"
   ],
   "notion": {
     "version": "2025-09-03",

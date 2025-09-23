@@ -12,7 +12,7 @@ from preferences import get_preference
 
 # === MAIN PIPELINE ===
 def main(pattern, sessions_back, notion_only=False, overwrite=False):
-    input_loc = get_preference("paths.input_loc", "/Users/gabriel/data")
+    input_loc = get_preference("paths.input_loc")
     labdata_loc = input_loc
 
     for subject in SUBJECTS:
