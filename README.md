@@ -22,11 +22,13 @@ The preferences file is searched for in this order:
 
 ### Preferences Structure
 
+A complete example can be found in `preferences.example.json`:
+
 ```json
 {
   "paths": {
     "input_loc": "/Users/gabriel/data",
-    "output_loc": "/Users/gabriel/performance_summaries",
+    "output_loc": "/Users/gabriel/performance_summaries", 
     "remote": "my_gdrive:performance_summaries"
   },
   "subjects": [
