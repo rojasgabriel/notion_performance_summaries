@@ -74,9 +74,9 @@ def backup_subject(subject: str, overwrite: bool = False):
         print(f"⚠️ Subject directory missing, skipping backup: {subject_dir}")
         return
     remote_path = f"{REMOTE}/{subject}"
-    cmd = f"rclone copy --progress {subject_dir} {remote_path}"
+    cmd = ["rclone", "copy", "--progress", subject_dir, remote_path]
     if not overwrite:
-        cmd += " --ignore-existing"
+        cmd.append("--ignore-existing")
     run_cmd(cmd)
     print(f"✅ Backup complete: {remote_path}")
 
@@ -90,9 +90,9 @@ def upload_to_drive(subject, fname, overwrite=False, backup_already_done=True):
     if not backup_already_done:
         # Fallback single file backup if explicitly requested (not expected in main flow)
         remote_path = f"{REMOTE}/{subject}"
-        cmd = f"rclone copy --progress {subject_dir} {remote_path}"
+        cmd = ["rclone", "copy", "--progress", subject_dir, remote_path]
         if not overwrite:
-            cmd += " --ignore-existing"
+            cmd.append("--ignore-existing")
         run_cmd(cmd)
         print(f"📁 On-demand backup performed for {fname}")
     return upload_to_notion_and_get_file_id(file_path)
