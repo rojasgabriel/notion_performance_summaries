@@ -6,7 +6,7 @@ import argparse
 from config import OUTPUT_LOC, SUBJECTS
 from data_processing import ensure_sessions, run_matlab
 from notion_api import find_subject_page, find_child_db, insert_summary
-from file_operations import upload_to_drive
+from file_operations import upload_to_drive, backup_subject
 from preferences import get_preference
 
 
@@ -37,7 +37,11 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
         if not os.path.exists(subject_output):
             continue
 
-        for fname in os.listdir(subject_output):
+        # Perform a single backup per subject (copy vs sync) before per-file Notion uploads
+        backup_subject(subject, overwrite=overwrite)
+
+        processed = set()
+        for fname in sorted(os.listdir(subject_output)):
             if fname.endswith(".png"):
                 # Extract date from filename to check if it matches the exact pattern
                 match = re.search(r"(\d{8})", fname)
@@ -48,7 +52,12 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     print(f"⏭️ Skipping {fname} - not matching pattern date {pattern}")
                     continue
 
-                notion_file_id = upload_to_drive(subject, fname, overwrite=overwrite)
+                if fname in processed:
+                    continue
+                # Upload only to Notion; backup already done for the subject
+                notion_file_id = upload_to_drive(
+                    subject, fname, overwrite=overwrite, backup_already_done=True
+                )
                 page_id = find_subject_page(subject)
                 if not page_id:
                     print(f"⚠️ No Notion page for {subject}")
@@ -70,6 +79,7 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     session_name=session_name,
                     overwrite=overwrite,
                 )
+                processed.add(fname)
 
 
 def parse_arguments():

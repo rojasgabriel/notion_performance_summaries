@@ -1,12 +1,13 @@
-"""Notion API functions for managing database operations and page creation."""
+"""Notion API functions for managing database operations and page creation.
+
+This module uses ONLY the 2025-09-03 Notion API style:
+    * All database-like queries go through data source endpoints: /v1/data_sources/{id}/query
+    * Page parent references use {"type": "data_source_id", "data_source_id": <id>}
+    * File attachments use the file_upload object (created elsewhere) inside a Files & media property
+"""
 
 import requests
-from config import (
-    LAB_DB_ID,
-    base_headers,
-    json_headers,
-    _DATA_SOURCE_CACHE,
-)
+from config import LAB_DB_ID, base_headers, json_headers, _DATA_SOURCE_CACHE
 
 
 def get_data_source_id(database_id: str) -> str:
@@ -25,14 +26,26 @@ def get_data_source_id(database_id: str) -> str:
     return ds_id
 
 
+def _query_data_source(data_source_id: str, filter_payload: dict):
+    """Low-level wrapper to query a data source (new API). Returns JSON dict."""
+    url = f"https://api.notion.com/v1/data_sources/{data_source_id}/query"
+    res = requests.post(url, headers=json_headers, json=filter_payload)
+    try:
+        res.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        snippet = res.text[:300] if hasattr(res, "text") else "(no body)"
+        raise RuntimeError(
+            f"Data source query failed ({data_source_id}): {e} :: {snippet}"
+        ) from e
+    return res.json()
+
+
 def find_subject_page(subject):
-    """Find the Notion page for a specific lab subject."""
-    url = f"https://api.notion.com/v1/databases/{LAB_DB_ID}/query"
+    """Find the Notion page for a specific lab subject via data source query only."""
+    ds_id = get_data_source_id(LAB_DB_ID)
     payload = {"filter": {"property": "ID", "title": {"equals": subject}}}
-    res = requests.post(url, headers=json_headers, json=payload)
-    res.raise_for_status()
-    data = res.json()
-    return data["results"][0]["id"] if data["results"] else None
+    data = _query_data_source(ds_id, payload)
+    return data["results"][0]["id"] if data.get("results") else None
 
 
 def find_child_db(page_id):
@@ -50,13 +63,11 @@ def find_child_db(page_id):
 
 
 def find_existing_summary(perf_db_id, session_name):
-    """Check if a performance summary entry already exists for the given session."""
-    url = f"https://api.notion.com/v1/databases/{perf_db_id}/query"
+    """Check if a performance summary entry already exists (data source query)."""
+    perf_ds_id = get_data_source_id(perf_db_id)
     payload = {"filter": {"property": "Session ID", "title": {"equals": session_name}}}
-    res = requests.post(url, headers=json_headers, json=payload)
-    res.raise_for_status()
-    data = res.json()
-    return data["results"][0]["id"] if data["results"] else None
+    data = _query_data_source(perf_ds_id, payload)
+    return data["results"][0]["id"] if data.get("results") else None
 
 
 def insert_summary(
