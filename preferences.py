@@ -17,14 +17,8 @@ DEFAULT_PREFERENCES = {
 
 
 def get_preferences_path() -> Path:
-    """Get the path to the preferences.json file."""
-    # Try to find preferences.json in current directory first, then home directory
-    current_dir = Path.cwd() / "preferences.json"
-    if current_dir.exists():
-        return current_dir
-
-    home_dir = Path.home() / ".notion_performance_summaries" / "preferences.json"
-    return home_dir
+    """Return the path to the preferences.json file in your home directory."""
+    return Path.home() / ".notion_performance_summaries" / "preferences.json"
 
 
 def create_default_preferences(preferences_path: Path) -> Dict[str, Any]:
@@ -36,11 +30,7 @@ def create_default_preferences(preferences_path: Path) -> Dict[str, Any]:
         json.dump(DEFAULT_PREFERENCES, f, indent=2)
 
     print(f"✨ Created default preferences file at: {preferences_path}")
-    print("⚠️  IMPORTANT: You must edit this file before running the application!")
-    print(
-        "🔧 Please configure your input/output paths and lab subjects in the preferences file."
-    )
-    print("📝 See preferences.example.json for detailed configuration help.")
+    print("⚠️  IMPORTANT: Edit this file before running the code again.")
 
     return DEFAULT_PREFERENCES
 
@@ -120,15 +110,9 @@ def validate_preferences():
         errors.append("Missing required configuration: subjects list cannot be empty")
 
     if errors:
-        preferences_path = get_preferences_path()
         print("❌ Configuration Error: Required preferences are missing or empty!")
         for error in errors:
             print(f"   • {error}")
-        print(f"\n🔧 Please edit your preferences file: {preferences_path}")
-        print("📝 See preferences.example.json for configuration help.")
-        raise RuntimeError(
-            "Application cannot run with incomplete configuration. Please update your preferences.json file."
-        )
 
 
 def reload_preferences():
