@@ -17,6 +17,7 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
 
     for subject in SUBJECTS:
         print(f"\n⏳ Processing {subject}")
+
         if not notion_only:
             sessions = ensure_sessions(subject, pattern, sessions_back, input_loc)
             if not sessions:
@@ -31,9 +32,22 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                 print(f"⚠️ No output directory for {subject}, skipping Notion upload")
                 continue
 
-        # Find PNGs
+        # Find PNGs that match the EXACT pattern date only
+        subject_output = f"{OUTPUT_LOC}/{subject}"
+        if not os.path.exists(subject_output):
+            continue
+
         for fname in os.listdir(subject_output):
             if fname.endswith(".png"):
+                # Extract date from filename to check if it matches the exact pattern
+                match = re.search(r"(\d{8})", fname)
+                file_date = match.group(1) if match else None
+
+                # Skip files that don't match the exact pattern date
+                if file_date and file_date != pattern:
+                    print(f"⏭️ Skipping {fname} - not matching pattern date {pattern}")
+                    continue
+
                 notion_file_id = upload_to_drive(subject, fname)
                 page_id = find_subject_page(subject)
                 if not page_id:
@@ -45,9 +59,8 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     continue
 
                 # Extract a cleaner session name from the filename
-                match = re.search(r"(\d{8})", fname)
                 session_name = (
-                    match.group(1) if match else fname.replace("_summary.png", "")
+                    file_date if file_date else fname.replace("_summary.png", "")
                 )
 
                 insert_summary(
