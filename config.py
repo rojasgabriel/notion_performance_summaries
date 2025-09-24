@@ -1,7 +1,6 @@
 """Configuration constants and headers for Notion Performance Summaries."""
 
 import os
-from typing import Dict
 from preferences import get_preference, validate_preferences
 
 # Validate preferences before loading configuration
@@ -34,6 +33,3 @@ json_headers = {
     **base_headers,
     "Content-Type": "application/json",
 }
-
-# Simple cache for database_id -> data_source_id lookups
-_DATA_SOURCE_CACHE: Dict[str, str] = {}
