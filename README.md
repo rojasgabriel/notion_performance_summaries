@@ -98,6 +98,6 @@ notion_summaries 20250820 9 --notion-only --overwrite
 - `date_pattern`: Date pattern in YYYYMMDD format (e.g., 20250820)
 - `sessions_back`: Number of sessions to go back from the pattern date
 - `--notion-only`: Skip data processing and MATLAB execution, only upload existing PNG files to Notion
-- `--overwrite`: Overwrite existing entries in the database instead of skipping them
+- `--overwrite`: Overwrite existing entries in the database and files on Google Drive instead of skipping them
 
 This will generate performance summaries, back them up to Google Drive using rclone, and insert them into Notion.

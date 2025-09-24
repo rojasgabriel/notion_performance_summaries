@@ -83,13 +83,17 @@ def upload_to_notion_and_get_file_id(filepath):
         raise
 
 
-def upload_to_drive(subject, fname):
+def upload_to_drive(subject, fname, overwrite=False):
     """Upload PNG to Drive as backup, then upload to Notion and return Notion file id."""
     local_file_path = f"{OUTPUT_LOC}/{subject}/{fname}"
 
     # Backup to Google Drive
     remote_path = f"{REMOTE}/{subject}"
-    run_cmd(["rclone", "copy", local_file_path, remote_path])
+    if overwrite:
+        rclone_cmd = ["rclone", "sync", local_file_path, remote_path]
+    else:
+        rclone_cmd = ["rclone", "copy", local_file_path, remote_path]
+    run_cmd(rclone_cmd)
     print(f"📁 Backed up to Google Drive: {remote_path}")
 
     # Upload to Notion and get the Notion file id
