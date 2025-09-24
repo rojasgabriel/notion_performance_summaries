@@ -5,8 +5,6 @@ from config import (
     LAB_DB_ID,
     base_headers,
     json_headers,
-    legacy_base_headers,
-    legacy_json_headers,
     _DATA_SOURCE_CACHE,
 )
 
@@ -31,7 +29,7 @@ def find_subject_page(subject):
     """Find the Notion page for a specific lab subject."""
     url = f"https://api.notion.com/v1/databases/{LAB_DB_ID}/query"
     payload = {"filter": {"property": "ID", "title": {"equals": subject}}}
-    res = requests.post(url, headers=legacy_json_headers, json=payload)
+    res = requests.post(url, headers=json_headers, json=payload)
     res.raise_for_status()
     data = res.json()
     return data["results"][0]["id"] if data["results"] else None
@@ -40,7 +38,7 @@ def find_subject_page(subject):
 def find_child_db(page_id):
     """Find the performance summaries child database in a subject's page."""
     url = f"https://api.notion.com/v1/blocks/{page_id}/children"
-    res = requests.get(url, headers=legacy_base_headers)
+    res = requests.get(url, headers=base_headers)
     res.raise_for_status()
     for b in res.json()["results"]:
         if b["type"] == "child_database":
@@ -55,7 +53,7 @@ def find_existing_summary(perf_db_id, session_name):
     """Check if a performance summary entry already exists for the given session."""
     url = f"https://api.notion.com/v1/databases/{perf_db_id}/query"
     payload = {"filter": {"property": "Session ID", "title": {"equals": session_name}}}
-    res = requests.post(url, headers=legacy_json_headers, json=payload)
+    res = requests.post(url, headers=json_headers, json=payload)
     res.raise_for_status()
     data = res.json()
     return data["results"][0]["id"] if data["results"] else None
