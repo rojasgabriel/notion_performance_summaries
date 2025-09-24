@@ -67,7 +67,7 @@ def upload_to_notion_and_get_file_id(filepath):
         raise
 
 
-def backup_subject(subject: str, overwrite: bool = False):
+def backup_subject(subject: str, overwrite: bool = False, dry_run: bool = False):
     """Perform a single backup operation for a subject directory."""
     subject_dir = f"{OUTPUT_LOC}/{subject}"
     if not os.path.isdir(subject_dir):
@@ -77,11 +77,13 @@ def backup_subject(subject: str, overwrite: bool = False):
     cmd = ["rclone", "copy", "--progress", subject_dir, remote_path]
     if not overwrite:
         cmd.append("--ignore-existing")
-    run_cmd(cmd)
+    run_cmd(cmd, dry_run=dry_run)
     print(f"✅ Backup complete: {remote_path}")
 
 
-def upload_to_drive(subject, fname, overwrite=False, backup_already_done=True):
+def upload_to_drive(
+    subject, fname, overwrite=False, backup_already_done=True, dry_run=False
+):
     """Upload PNG to Notion (assumes backup already handled unless specified)."""
     subject_dir = f"{OUTPUT_LOC}/{subject}"
     file_path = f"{subject_dir}/{fname}"
@@ -93,6 +95,11 @@ def upload_to_drive(subject, fname, overwrite=False, backup_already_done=True):
         cmd = ["rclone", "copy", "--progress", subject_dir, remote_path]
         if not overwrite:
             cmd.append("--ignore-existing")
-        run_cmd(cmd)
+        run_cmd(cmd, dry_run=dry_run)
         print(f"📁 On-demand backup performed for {fname}")
+
+    if dry_run:
+        print(f"DRY RUN: Skipping Notion upload for {fname}")
+        return "dry-run-file-id"
+
     return upload_to_notion_and_get_file_id(file_path)

@@ -11,7 +11,7 @@ from .preferences import get_preference  # type: ignore
 
 
 # === MAIN PIPELINE ===
-def main(pattern, sessions_back, notion_only=False, overwrite=False):
+def main(pattern, sessions_back, notion_only=False, overwrite=False, dry_run=False):
     input_loc = get_preference("paths.input_loc")
     labdata_loc = input_loc
 
@@ -19,12 +19,20 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
         print(f"\n⏳ Processing {subject}")
 
         if not notion_only:
-            sessions = ensure_sessions(subject, pattern, sessions_back, input_loc)
+            sessions = ensure_sessions(
+                subject, pattern, sessions_back, input_loc, dry_run=dry_run
+            )
             if not sessions:
                 continue
             subject_output = f"{OUTPUT_LOC}/{subject}"
             run_matlab(
-                subject, input_loc, labdata_loc, subject_output, sessions_back, pattern
+                subject,
+                input_loc,
+                labdata_loc,
+                subject_output,
+                sessions_back,
+                pattern,
+                dry_run=dry_run,
             )
         else:
             subject_output = f"{OUTPUT_LOC}/{subject}"
@@ -38,7 +46,7 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
             continue
 
         # Perform a single backup per subject (copy vs sync) before per-file Notion uploads
-        backup_subject(subject, overwrite=overwrite)
+        backup_subject(subject, overwrite=overwrite, dry_run=dry_run)
 
         processed = set()
         for fname in sorted(os.listdir(subject_output)):
@@ -56,8 +64,16 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     continue
                 # Upload only to Notion; backup already done for the subject
                 notion_file_id = upload_to_drive(
-                    subject, fname, overwrite=overwrite, backup_already_done=True
+                    subject,
+                    fname,
+                    overwrite=overwrite,
+                    backup_already_done=True,
+                    dry_run=dry_run,
                 )
+                if dry_run:
+                    print("DRY RUN: Skipping Notion API calls")
+                    continue
+
                 page_id = find_subject_page(subject)
                 if not page_id:
                     print(f"⚠️ No Notion page for {subject}")
@@ -118,6 +134,12 @@ def parse_arguments():
         help="Overwrite existing entries in the database instead of skipping them",
     )
 
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print commands that would be executed without running them",
+    )
+
     return parser.parse_args()
 
 
@@ -129,6 +151,7 @@ def cli():
         args.sessions_back,
         notion_only=args.notion_only,
         overwrite=args.overwrite,
+        dry_run=args.dry_run,
     )
 
 
