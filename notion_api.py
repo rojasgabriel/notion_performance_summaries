@@ -5,7 +5,24 @@ from config import (
     LAB_DB_ID,
     base_headers,
     json_headers,
+    _DATA_SOURCE_CACHE,
 )
+
+
+def get_data_source_id(database_id: str) -> str:
+    """Get data source ID for a database, using cache if available."""
+    if database_id in _DATA_SOURCE_CACHE:
+        return _DATA_SOURCE_CACHE[database_id]
+    url = f"https://api.notion.com/v1/databases/{database_id}"
+    res = requests.get(url, headers=base_headers)
+    res.raise_for_status()
+    data = res.json()
+    data_sources = data.get("data_sources") or []
+    if not data_sources:
+        raise RuntimeError(f"No data_sources found for database {database_id}")
+    ds_id = data_sources[0]["id"]
+    _DATA_SOURCE_CACHE[database_id] = ds_id
+    return ds_id
 
 
 def find_subject_page(subject):
@@ -75,7 +92,8 @@ def insert_summary(
                 print(f"⚠️ Warning: Could not archive existing entry: {e}")
 
     create_url = "https://api.notion.com/v1/pages"
-    
+    perf_ds_id = get_data_source_id(perf_db_id)
+
     # Build Files & media items
     if notion_file_id:
         files_items = [{"type": "file_upload", "file_upload": {"id": notion_file_id}}]
@@ -85,7 +103,7 @@ def insert_summary(
         raise ValueError("insert_summary requires notion_file_id or external_url")
 
     create_payload = {
-        "parent": {"type": "database_id", "database_id": perf_db_id},
+        "parent": {"type": "data_source_id", "data_source_id": perf_ds_id},
         "properties": {
             "Session ID": {"title": [{"text": {"content": session_name}}]},
             "Files & media": {"files": files_items},
