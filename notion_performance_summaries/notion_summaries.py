@@ -3,11 +3,11 @@ import re
 import argparse
 
 # Import from organized modules
-from .config import OUTPUT_LOC, SUBJECTS
-from .data_processing import ensure_sessions, run_matlab
-from .notion_api import find_subject_page, find_child_db, insert_summary
-from .file_operations import upload_to_drive, backup_subject
-from .preferences import get_preference
+from .config import OUTPUT_LOC, SUBJECTS  # type: ignore
+from .data_processing import ensure_sessions, run_matlab  # type: ignore
+from .notion_api import find_subject_page, find_child_db, insert_summary  # type: ignore
+from .file_operations import upload_to_drive, backup_subject  # type: ignore
+from .preferences import get_preference  # type: ignore
 
 
 # === MAIN PIPELINE ===

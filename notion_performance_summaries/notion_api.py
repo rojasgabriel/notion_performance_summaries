@@ -7,7 +7,7 @@ This module uses ONLY the 2025-09-03 Notion API style:
 """
 
 import requests
-from .config import LAB_DB_ID, base_headers, json_headers, _DATA_SOURCE_CACHE
+from .config import LAB_DB_ID, base_headers, json_headers, _DATA_SOURCE_CACHE  # type: ignore
 
 
 def get_data_source_id(database_id: str) -> str:

@@ -3,8 +3,8 @@
 import os
 import json
 import requests
-from .config import OUTPUT_LOC, REMOTE, base_headers, json_headers
-from .data_processing import run_cmd
+from .config import OUTPUT_LOC, REMOTE, base_headers, json_headers  # type: ignore
+from .data_processing import run_cmd  # type: ignore
 
 
 def upload_to_notion_and_get_file_id(filepath):

@@ -2,7 +2,7 @@
 
 import os
 from typing import Dict
-from .preferences import get_preference, validate_preferences
+from .preferences import get_preference, validate_preferences  # type: ignore
 
 # Validate preferences before loading configuration
 validate_preferences()
