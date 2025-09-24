@@ -17,6 +17,8 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
 
     for subject in SUBJECTS:
         print(f"\n⏳ Processing {subject}")
+        sessions = []
+
         if not notion_only:
             sessions = ensure_sessions(subject, pattern, sessions_back, input_loc)
             if not sessions:
@@ -30,10 +32,32 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
             if not os.path.exists(subject_output):
                 print(f"⚠️ No output directory for {subject}, skipping Notion upload")
                 continue
+            # In notion-only mode, determine which sessions should be processed
+            # based on pattern and sessions_back to avoid processing all files
+            sessions = _get_sessions_for_pattern(subject, pattern, sessions_back)
 
-        # Find PNGs
+        # Extract date patterns from sessions for filtering PNG files
+        # Sessions are in format YYYYMMDD_HHMMSS, we need YYYYMMDD for matching
+        session_dates = (
+            {session.split("_")[0] for session in sessions} if sessions else set()
+        )
+
+        # Find PNGs that match the current session pattern
+        subject_output = f"{OUTPUT_LOC}/{subject}"
+        if not os.path.exists(subject_output):
+            continue
+
         for fname in os.listdir(subject_output):
             if fname.endswith(".png"):
+                # Extract date from filename to check if it matches current sessions
+                match = re.search(r"(\d{8})", fname)
+                file_date = match.group(1) if match else None
+
+                # Skip files that don't match the current session dates
+                if session_dates and file_date and file_date not in session_dates:
+                    print(f"⏭️ Skipping {fname} - not in current session scope")
+                    continue
+
                 notion_file_id = upload_to_drive(subject, fname)
                 page_id = find_subject_page(subject)
                 if not page_id:
@@ -45,9 +69,8 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     continue
 
                 # Extract a cleaner session name from the filename
-                match = re.search(r"(\d{8})", fname)
                 session_name = (
-                    match.group(1) if match else fname.replace("_summary.png", "")
+                    file_date if file_date else fname.replace("_summary.png", "")
                 )
 
                 insert_summary(
@@ -57,6 +80,34 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     session_name=session_name,
                     overwrite=overwrite,
                 )
+
+
+def _get_sessions_for_pattern(subject, pattern, sessions_back):
+    """
+    Get sessions that would be processed for a given pattern and sessions_back.
+    This is used in notion-only mode to determine which PNG files should be processed.
+    """
+    try:
+        # Use the same logic as ensure_sessions but without downloading
+        from data_processing import run_cmd
+
+        out = run_cmd(["labdata", "sessions", subject, "--files"])
+        sessions = sorted(
+            list(set(re.findall(r"[0-9]{8}_[0-9]{6}", out))), reverse=True
+        )
+        # Find pattern match
+        match_index = next(
+            (i for i, s in enumerate(sessions) if s.startswith(pattern)), -1
+        )
+        if match_index < 0:
+            print(f"❌ No session found for {subject} with {pattern}")
+            return []
+        end_index = min(match_index + sessions_back + 1, len(sessions))
+        return sessions[match_index:end_index]
+    except Exception as e:
+        print(f"⚠️ Could not determine sessions for {subject}: {e}")
+        print("⚠️ Processing all PNG files in notion-only mode")
+        return []
 
 
 def parse_arguments():
