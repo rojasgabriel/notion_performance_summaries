@@ -89,9 +89,10 @@ def upload_to_drive(subject, fname, overwrite=False):
 
     # Backup to Google Drive
     remote_path = f"{REMOTE}/{subject}"
-    rclone_cmd = ["rclone", "copy", local_file_path, remote_path]
     if overwrite:
-        rclone_cmd.append("--update")
+        rclone_cmd = ["rclone", "sync", local_file_path, remote_path]
+    else:
+        rclone_cmd = ["rclone", "copy", local_file_path, remote_path]
     run_cmd(rclone_cmd)
     print(f"📁 Backed up to Google Drive: {remote_path}")
 
