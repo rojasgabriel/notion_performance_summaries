@@ -11,7 +11,7 @@
     "  Example: '/Users/yourname/data'",
     "  Used by the matlab batch script",
     "",
-    "• paths.output_loc: Directory where performance summary PNG files will be saved", 
+    "• paths.output_loc: Directory where performance summary PNG files will be saved",
     "  Example: '/Users/yourname/performance_summaries'",
     "  The application creates subdirectories here for each subject",
     "",

@@ -22,13 +22,9 @@ setup(
     author="Gabriel Rojas",
     url="https://github.com/rojasgabriel/notion_performance_summaries",
     packages=find_packages(),
-    python_requires=">=3.6",
-    install_requires=[
-        "requests",
-    ],
     entry_points={
         "console_scripts": [
-            "notion_summaries=notion_summaries:cli",
+            "notion_summaries=notion_performance_summaries.notion_summaries:cli",
         ],
     },
 )
