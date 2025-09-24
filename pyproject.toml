@@ -6,16 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "notion-performance-summaries"
 version = "0.1.0"
 authors = [
-  { name="Gabriel Rojas", email="gabriel.rojas@ucsf.edu" },
+  { name="Gabriel Rojas", email="grojasbowe@ucla.edu" },
 ]
 description = "Generate performance summaries for chipmunk using matlab and labdata-tools and upload them to Notion"
 readme = "README.md"
-requires-python = ">=3.8"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+requires-python = ">=3.10"
 dependencies = [
     "requests",
 ]
