@@ -48,7 +48,7 @@ def main(pattern, sessions_back, notion_only=False, overwrite=False):
                     print(f"⏭️ Skipping {fname} - not matching pattern date {pattern}")
                     continue
 
-                notion_file_id = upload_to_drive(subject, fname)
+                notion_file_id = upload_to_drive(subject, fname, overwrite=overwrite)
                 page_id = find_subject_page(subject)
                 if not page_id:
                     print(f"⚠️ No Notion page for {subject}")
