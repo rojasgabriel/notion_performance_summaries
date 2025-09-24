@@ -25,8 +25,7 @@
     "  Replace with your actual subject identifiers",
     "",
     "ADVANCED (usually don't need to change):",
-    "• notion.version: Current Notion API version",
-    "• notion.version_legacy: Legacy API version for database operations"
+    "• notion.version: Current Notion API version"
   ],
   "paths": {
     "input_loc": "/path/to/your/lab/data",
@@ -38,7 +37,6 @@
     "YOUR_SUBJECT_002"
   ],
   "notion": {
-    "version": "2025-09-03",
-    "version_legacy": "2022-06-28"
+    "version": "2025-09-03"
   }
 }

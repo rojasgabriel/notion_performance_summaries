@@ -12,7 +12,7 @@ DEFAULT_PREFERENCES = {
         "remote": "",
     },
     "subjects": [],
-    "notion": {"version": "2025-09-03", "version_legacy": "2022-06-28"},
+    "notion": {"version": "2025-09-03"},
 }
 
 

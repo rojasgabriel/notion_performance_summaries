@@ -35,16 +35,5 @@ json_headers = {
     "Content-Type": "application/json",
 }
 
-# Legacy headers for database operations (pre-2025 data sources)
-NOTION_VERSION_LEGACY = get_preference("notion.version_legacy", "2022-06-28")
-legacy_base_headers = {
-    "Authorization": f"Bearer {NOTION_TOKEN}",
-    "Notion-Version": NOTION_VERSION_LEGACY,
-}
-legacy_json_headers = {
-    **legacy_base_headers,
-    "Content-Type": "application/json",
-}
-
 # Simple cache for database_id -> data_source_id lookups
 _DATA_SOURCE_CACHE: Dict[str, str] = {}

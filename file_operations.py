@@ -8,22 +8,22 @@ from data_processing import run_cmd
 
 
 def upload_to_notion_and_get_file_id(filepath):
-    """
-    Uploads a file directly to Notion using the official small file upload flow.
-    Steps:
-      1) POST /v1/files with name + mime to get an upload_url and file id.
-      2) PUT the bytes to the upload_url.
-    Returns: the Notion file id (to be referenced in blocks as a file upload).
+    """Upload a file using ONLY the 2025-09-03 Notion file upload flow.
+
+    Flow:
+      1) POST /v1/file_uploads  { filename, content_type, mode=single_part }
+      2) POST /v1/file_uploads/{id}/send (multipart form field "file")
+      3) Reference returned id in Files & media property as type file_upload.
     """
     try:
         file_name = os.path.basename(filepath)
-        mime_type = "image/png"  # our summaries are PNGs
+        mime_type = "image/png"
         file_size = os.path.getsize(filepath)
         print(
             f"📤 Starting direct Notion upload for {file_name} ({file_size} bytes)..."
         )
 
-        # Step 1: Create a file upload (JSON)
+        # Step 1: Create file upload descriptor
         create_payload = {
             "filename": file_name,
             "content_type": mime_type,
@@ -34,19 +34,7 @@ def upload_to_notion_and_get_file_id(filepath):
             headers=json_headers,
             json=create_payload,
         )
-        try:
-            r_create.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            body = None
-            try:
-                body = r_create.text
-            except Exception:
-                pass
-            print(
-                f"❌ HTTP Error during Notion create file upload: {e}\nResponse Body: {body}"
-            )
-            raise
-
+        r_create.raise_for_status()
         meta = r_create.json()
         file_id = meta.get("id") or (
             meta.get("file_upload", {})
@@ -57,44 +45,67 @@ def upload_to_notion_and_get_file_id(filepath):
             print("⚠️ Unexpected create response:", json.dumps(meta, indent=2))
             raise RuntimeError("Notion did not return file upload id")
 
-        # Step 2: Send file contents (multipart)
+        # Step 2: Send file bytes
         send_url = f"https://api.notion.com/v1/file_uploads/{file_id}/send"
         with open(filepath, "rb") as f:
             files = {"file": (file_name, f, mime_type)}
             r_send = requests.post(send_url, headers=base_headers, files=files)
-        try:
-            r_send.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            body = None
-            try:
-                body = r_send.text
-            except Exception:
-                pass
-            print(
-                f"❌ HTTP Error during Notion send file upload: {e}\nResponse Body: {body}"
-            )
-            raise
+        r_send.raise_for_status()
 
         print(f"✅ Uploaded to Notion (file id: {file_id})")
         return file_id
-
+    except requests.exceptions.HTTPError as e:
+        body = None
+        try:
+            body = e.response.text  # type: ignore[attr-defined]
+        except Exception:
+            pass
+        print(f"❌ HTTP error during Notion upload: {e}\nBody: {body}")
+        raise
     except Exception as e:
         print(f"❌ Notion upload failed: {e}")
         raise
 
 
-def upload_to_drive(subject, fname, overwrite=False):
-    """Upload PNG to Drive as backup, then upload to Notion and return Notion file id."""
-    local_file_path = f"{OUTPUT_LOC}/{subject}/{fname}"
+def backup_subject(subject: str, overwrite: bool = False):
+    """Perform a single backup operation for a subject directory.
 
-    # Backup to Google Drive
+    overwrite False -> rclone copy (non-destructive) of the subject directory
+    overwrite True  -> rclone sync (makes remote mirror local)
+    """
+    subject_dir = f"{OUTPUT_LOC}/{subject}"
+    if not os.path.isdir(subject_dir):
+        print(f"⚠️ Subject directory missing, skipping backup: {subject_dir}")
+        return
     remote_path = f"{REMOTE}/{subject}"
     if overwrite:
-        rclone_cmd = ["rclone", "sync", local_file_path, remote_path]
+        cmd = ["rclone", "sync", subject_dir, remote_path]
+        print("🔄 Overwrite mode: syncing subject directory to remote")
     else:
-        rclone_cmd = ["rclone", "copy", local_file_path, remote_path]
-    run_cmd(rclone_cmd)
-    print(f"📁 Backed up to Google Drive: {remote_path}")
+        cmd = ["rclone", "copy", subject_dir, remote_path]
+    run_cmd(cmd)
+    print(f"✅ Backup complete ({'sync' if overwrite else 'copy'}): {remote_path}")
 
-    # Upload to Notion and get the Notion file id
-    return upload_to_notion_and_get_file_id(local_file_path)
+
+def upload_to_drive(subject, fname, overwrite=False, backup_already_done=True):
+    """Upload PNG to Notion (assumes backup already handled unless specified)."""
+    subject_dir = f"{OUTPUT_LOC}/{subject}"
+    file_path = f"{subject_dir}/{fname}"
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(file_path)
+    if not backup_already_done:
+        # Fallback single file backup if explicitly requested (not expected in main flow)
+        remote_path = f"{REMOTE}/{subject}"
+        cmd = (
+            ["rclone", "copy", file_path, remote_path]
+            if not overwrite
+            else [
+                "rclone",
+                "sync",
+                subject_dir,
+                remote_path,
+            ]
+        )
+        run_cmd(cmd)
+        print(f"📁 On-demand backup performed for {fname}")
+    return upload_to_notion_and_get_file_id(file_path)
