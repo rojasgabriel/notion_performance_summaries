@@ -84,7 +84,7 @@ def backup_subject(subject: str, overwrite: bool = False):
     else:
         cmd = ["rclone", "copy", subject_dir, remote_path]
     run_cmd(cmd)
-    print(f"� Backup complete ({'sync' if overwrite else 'copy'}): {remote_path}")
+    print(f"✅ Backup complete ({'sync' if overwrite else 'copy'}): {remote_path}")
 
 
 def upload_to_drive(subject, fname, overwrite=False, backup_already_done=True):
