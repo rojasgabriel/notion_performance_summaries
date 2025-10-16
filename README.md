@@ -1,5 +1,5 @@
 # notion_performance_summaries
-Code for generating performance summaries for chipmunk and directly uploading them into a database in notion
+Code for generating performance summaries for chipmunk and directly uploading them into a database in Notion. This works with labdata-tools, not labdata (yet).
 
 `extensive testing is still required!!!`
 
