@@ -5,7 +5,7 @@ Code for generating performance summaries for chipmunk and directly uploading th
 
 ## Installation
 
-Install the package using pip:
+In the folder you cloned the repo, run:
 ```bash
 pip install -e .
 ```
